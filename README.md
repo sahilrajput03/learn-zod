@@ -8,7 +8,10 @@
 ```ts
 z.string()
 z.number()
+z.array()
 z.null()
+z.string().datetime(),
+z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 // Making anything optional
 z.string().datetime().optional(),
 ```
