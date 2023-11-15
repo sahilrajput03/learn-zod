@@ -9,6 +9,8 @@
 z.string()
 z.number()
 z.null()
+// Making anything optional
+z.string().datetime().optional(),
 ```
 
 ## Initial Setup
