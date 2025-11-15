@@ -97,6 +97,10 @@ if (!result2.success) {
 
 // ✅ Extract the inferred type
 type User = z.infer<typeof User>;
+
+
+// Create new schema with all fields optional
+const UserPartial = User.partial();
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
