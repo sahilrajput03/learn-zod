@@ -13,11 +13,28 @@ import { z } from "zod";
 //  z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 //  z.string().datetime().optional(), // Making anything optional
 
-// creating a schema for strings
+// Creating a schema for strings
 const nameSchema = z.string();
+// Learn: Customizing errors (https://zod.dev/error-customization)
+//        1. We can provide custome error message via and it will be returned in `error.issues[*].message` property:
+// const nameSchema = z.string("Please provide string type only.");
+//        2. Another way to pass custom error message is via passing an object:
+// const nameSchema = z.string({ error: "Please provide string type only." });
+//        3. Passing an object allows us to pass function:
+// const nameSchema = z.string({
+//     error: (issue) => {
+//         const { code, input, expected } = issue
+//         console.log('issue?', Object.assign({}, { code, input, expected }))
+//         // issue.code; // the issue code
+//         // issue.input; // the input data
+//         // issue.inst; // (*very long object*) the schema/check that originated this issue
+//         // issue.path; // the path of the error
+//         return "Please provide string type only. " + new Date().toString();
+//     }
+// });
 // parsing
 console.log(nameSchema.parse("tuna")); // "tuna"
-// console.log(mySchema.parse(12)); // throws ZodError
+// console.log(nameSchema.parse(12)); // throws ZodError
 
 // Using `safeParse` zod doesn't throw error when validation fails
 console.log(nameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
