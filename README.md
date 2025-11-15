@@ -32,9 +32,38 @@ npm start
 ### File - `1.ts`
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./1.ts) -->
+<!-- The below code snippet is automatically added from ./1.ts -->
+```ts
+import { z } from "zod";
+
+// creating a schema for strings
+const mySchema = z.string();
+
+// parsing
+mySchema.parse("tuna"); // => "tuna"
+mySchema.parse(12); // => throws ZodError
+
+// "safe" parsing (doesn't throw error if validation fails)
+mySchema.safeParse("tuna"); // => { success: true; data: "tuna" }
+mySchema.safeParse(12); // => { success: false; error: ZodError }
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
 ### File - `2.ts`
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./2.ts) -->
+<!-- The below code snippet is automatically added from ./2.ts -->
+```ts
+import { z } from "zod";
+
+const User = z.object({
+  username: z.string(),
+});
+
+User.parse({ username: "Ludwig" });
+
+// extract the inferred type
+type User = z.infer<typeof User>;
+// { username: string }
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
