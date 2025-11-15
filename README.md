@@ -16,25 +16,28 @@
 <!-- The below code snippet is automatically added from ./1.ts -->
 ```ts
 import { z } from "zod";
-// Types Learned
+// * primitive types
 //  z.string()
 //  z.number()
+//  z.bigint();
+//  z.boolean();
+//  z.symbol();
+//  z.undefined();
+//  z.null();
+// * More
 //  z.array()
-//  z.null()
-//  z.undefined()
 //  z.string().datetime(),
 //  z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 //  z.string().datetime().optional(), // Making anything optional
 
 // creating a schema for strings
-const mySchema = z.string();
-
+const usernameSchema = z.string();
 // parsing
-console.log(mySchema.parse("tuna")); // "tuna"
+console.log(usernameSchema.parse("tuna")); // "tuna"
 // console.log(mySchema.parse(12)); // throws ZodError
 
 // Using `safeParse` zod doesn't throw error when validation fails
-console.log(mySchema.safeParse("tuna")); // { success: true; data: "tuna" }
+console.log(usernameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
 // console.log(mySchema.safeParse(12)); // { success: false; error: ZodError }
 
 
