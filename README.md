@@ -80,6 +80,7 @@ const SIMPLE_MONGODB_ID_REGEX = /^[a-f\d]{24}$/i;
 
 // From Piyush's Project
 
+// Job
 const Job = z.object({
 	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	images: z.array(z.object({
@@ -105,7 +106,8 @@ Job.parse({
 // extract the inferred type
 type JobType = z.infer<typeof Job>;
 
-// 
+
+// JobTask
 const JobTask = z.object({
 	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	job: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
@@ -131,6 +133,7 @@ JobTask.parse({
 type JobTaskType = z.infer<typeof JobTask>;
 
 
+// Order
 const Order = z.object({
 	user: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	paymentInfo: z.object({
