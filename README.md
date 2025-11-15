@@ -67,3 +67,10 @@ type User = z.infer<typeof User>;
 // { username: string }
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
+
+
+### File - `3.ts`
+
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./3.ts) -->
+<!-- The below code snippet is automatically added from ./3.ts -->
+<!-- MARKDOWN-AUTO-DOCS:END -->
