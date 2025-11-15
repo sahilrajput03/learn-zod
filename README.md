@@ -1,4 +1,6 @@
-# Docs
+# Learn Zod
+
+**Quick Links:**
 
 - Website: https://zod.dev/
 - Primitives: https://zod.dev/?id=primitives
