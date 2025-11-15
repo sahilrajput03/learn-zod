@@ -14,14 +14,28 @@ import { z } from "zod";
 //  z.string().datetime().optional(), // Making anything optional
 
 // creating a schema for strings
-const usernameSchema = z.string();
+const nameSchema = z.string();
 // parsing
-console.log(usernameSchema.parse("tuna")); // "tuna"
+console.log(nameSchema.parse("tuna")); // "tuna"
 // console.log(mySchema.parse(12)); // throws ZodError
 
 // Using `safeParse` zod doesn't throw error when validation fails
-console.log(usernameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
-// console.log(mySchema.safeParse(12)); // { success: false; error: ZodError }
+console.log(nameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
+// console.log(nameSchema.safeParse(12)); // { success: false; error: `ZodError instance` }
+const result1 = nameSchema.safeParse(12)
+if (!result1.success) {
+    console.log("❌ ~ result1.error.issues:", result1.error.issues)
+    /**
+    [
+        {
+            expected: 'string',
+            code: 'invalid_type',
+            path: [],
+            message: 'Invalid input: expected string, received number'
+        }
+    ]
+     */
+}
 
 
 // User
@@ -32,10 +46,10 @@ const User = z.object({
 });
 console.log(User.parse({ username: "Ludwig", phone: 1234 })); // { username: 'Ludwig', phone: 1234 }
 
-const result = User.safeParse({ username: 42, phone: "100" });
-if (!result.success) {
-    // console.log("🚀 ~ result:", result.error) // ZodError instance
-    console.log("🚀 ~ result.error.issues:", result.error.issues)
+const result2 = User.safeParse({ username: 42, phone: "100" });
+if (!result2.success) {
+    // console.log("❌ ~ result2:", result2.error) // `ZodError instance`
+    console.log("❌ ~ result2.error.issues:", result2.error.issues)
     /**
     [
         {
@@ -61,7 +75,7 @@ if (!result.success) {
           → at phone
      */
 } else {
-    result.data;
+    result2.data;
 }
 
 // ✅ Extract the inferred type
