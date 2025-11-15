@@ -1,4 +1,13 @@
 import { z } from "zod";
+// Types Learned
+//  z.string()
+//  z.number()
+//  z.array()
+//  z.null()
+//  z.undefined()
+//  z.string().datetime(),
+//  z.string().regex(SIMPLE_MONGODB_ID_REGEX),
+//  z.string().datetime().optional(), // Making anything optional
 
 // creating a schema for strings
 const mySchema = z.string();
@@ -7,9 +16,9 @@ const mySchema = z.string();
 console.log(mySchema.parse("tuna")); // "tuna"
 // console.log(mySchema.parse(12)); // throws ZodError
 
-// "safe" parsing (doesn't throw error if validation fails)
+// Using `safeParse` zod doesn't throw error when validation fails
 console.log(mySchema.safeParse("tuna")); // { success: true; data: "tuna" }
-console.log(mySchema.safeParse(12)); // { success: false; error: ZodError }
+// console.log(mySchema.safeParse(12)); // { success: false; error: ZodError }
 
 
 // User
