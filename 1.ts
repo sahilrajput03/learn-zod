@@ -100,4 +100,9 @@ type User = z.infer<typeof User>;
 
 
 // Create new schema with all fields optional
-const UserPartial = User.partial(); 
+const UserPartial = User.partial();
+
+
+// ❤️ Accessing a nested schema
+const CarSchema = z.object({ name: z.string(), price: z.number() });
+console.log(CarSchema.shape.name.parse("BMW")) // "BMW"
