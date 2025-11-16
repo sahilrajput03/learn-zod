@@ -123,6 +123,9 @@ const UserPartial = User.partial();
 // ❤️ Accessing a nested schema
 const CarSchema = z.object({ name: z.string(), price: z.number() });
 console.log(CarSchema.shape.name.parse("BMW")) // "BMW"
+
+
+//  TODO ❤️ ❤️ ❤️ : https://www.youtube.com/watch?v=9UVPk0Ulm6U
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
