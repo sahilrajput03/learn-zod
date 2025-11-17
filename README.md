@@ -30,6 +30,9 @@ import { z } from "zod";
 //  z.string().datetime(),
 //  z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 //  z.string().datetime().optional(), // Making anything optional
+// E.g., 
+//      const CarStatusEnumSchema = z.enum(CarStatusEnum).default(CarStatusEnum.AVAILABLE).optional()
+//      Note: `optiona()` must occur after default(..) else optional doesn't work. [TESTED]
 
 // Creating a schema for strings
 const nameSchema = z.string();
