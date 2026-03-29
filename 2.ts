@@ -1,99 +1,59 @@
 import { z } from "zod";
 
-const SIMPLE_MONGODB_ID_REGEX = /^[a-f\d]{24}$/i;
+// ❤️ Topics:
+//  - Accessing nested schema
 
-// From Piyush's Project
+// User
+console.log('\nUser 🚀')
+const UserSchema = z.object({
+    username: z.string(),
+    phone: z.number(),
+});
+console.log(UserSchema.parse({ username: "Ludwig", phone: 1234 })); // { username: 'Ludwig', phone: 1234 }
 
-// Job
-const Job = z.object({
-	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	images: z.array(z.object({
-		public_id: z.string(),
-		url: z.string(),
-	})),
-	itemName: z.string(),
-	costPerUnit: z.number(),
-	inventory: z.null(),
-	quantity: z.number(),
-});
-Job.parse({
-	order: '5c9cb7138a874f1dcd0d8dcc',
-	images: [{
-		public_id: 'abc',
-		url: 'abc',
-	}],
-	itemName: 'abc',
-	costPerUnit: 0,
-	inventory: null,
-	quantity: 0,
-});
-type JobType = z.infer<typeof Job>;
+const result2 = UserSchema.safeParse({ username: 42, phone: "100" });
+if (!result2.success) {
+    // console.log("❌ ~ result2:", result2.error) // `ZodError instance`
+    console.log("❌ ~ result2.error.issues:", result2.error.issues)
+    /**
+    [
+        {
+            expected: 'string',
+            code: 'invalid_type',
+            path: [ 'username' ],
+            message: 'Invalid input: expected string, received number'
+        },
+        {
+            expected: 'number',
+            code: 'invalid_type',
+            path: [ 'phone' ],
+            message: 'Invalid input: expected number, received string'
+        }
+    ]
+     */
 
+    // console.log(z.prettifyError(result.error))
+    /**
+        ✖ Invalid input: expected string, received number
+          → at username
+        ✖ Invalid input: expected number, received string
+          → at phone
+     */
+} else {
+    result2.data;
+}
 
-// JobTask
-const JobTask = z.object({
-	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	job: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	jobTaskType: z.number(),
-	status: z.number(),
-	type: z.string(),
-	notes: z.string(),
-	user: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	// `deadline` is optional here because we may want to set this on backend instead of getting from frontend.
-	deadline: z.string().datetime().optional(),
-});
-JobTask.parse({
-	order: '5c9cb7138a874f1dcd0d8dcc',
-	job: '5c9cb7138a874f1dcd0d8dcc',
-	jobTaskType: 0,
-	status: 0,
-	type: 'abc',
-	notes: 'abc',
-	user: '5c9cb7138a874f1dcd0d8dcc',
-	deadline: '2023-11-15T13:40:18.365Z',
-});
-type JobTaskType = z.infer<typeof JobTask>;
+// ✅ Extract the inferred type
+type UserSchema = z.infer<typeof UserSchema>;
 
 
-// Order
-const Order = z.object({
-	user: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	paymentInfo: z.object({
-		subTotal: z.number(),
-		discount: z.number(),
-		tax: z.number(),
-		totalAmount: z.number(),
-		paidAmount: z.number(),
-		remainingAmount: z.number(),
-	}),
-	note: z.string(),
-	customer: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
-	shippingInfo: z.object({
-		name: z.string(),
-		phoneNumber: z.number(),
-		deadline: z.string().datetime(),
-		address: z.string(),
-		instructions: z.string(),
-	})
-});
-Order.parse({
-	user: '5c9cb7138a874f1dcd0d8dcc',
-	paymentInfo: {
-		subTotal: 0,
-		discount: 0,
-		tax: 0,
-		totalAmount: 0,
-		paidAmount: 0,
-		remainingAmount: 0,
-	},
-	note: 'abc',
-	customer: '5c9cb7138a874f1dcd0d8dcc',
-	shippingInfo: {
-		name: 'abc',
-		phoneNumber: 0,
-		deadline: '2023-11-15T13:40:18.365Z',
-		address: 'abc',
-		instructions: 'abc',
-	}
-});
-type OrderType = z.infer<typeof Order>;
+// Create new schema with all fields optional
+const partialUserSchema = UserSchema.partial();
+
+
+// ❤️ Accessing a nested schema
+const CarSchema = z.object({ name: z.string(), price: z.number() });
+console.log(CarSchema.shape.name.parse("BMW")) // "BMW"
+
+
+//  TODO ❤️ ❤️ ❤️ : https://www.youtube.com/watch?v=9UVPk0Ulm6U

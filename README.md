@@ -239,3 +239,10 @@ Order.parse({
 type OrderType = z.infer<typeof Order>;
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
+
+
+### File - `3.ts`
+
+
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./3.ts) -->
+<!-- MARKDOWN-AUTO-DOCS:END -->

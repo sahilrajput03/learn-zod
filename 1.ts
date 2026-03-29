@@ -1,8 +1,10 @@
-// ❤️ Topics:
-//  1. Check validation errors without throwing errors via `safeParse`.
-//  2. 
-
 import { z } from "zod";
+import { deepEqual, equal } from 'assert'
+
+// ❤️ Topics:
+//  - Safe (throw error on validation errors) and,
+//  - Unsafe parsing via `safeParse()` (without throwing errors on validation errors)
+
 // * primitive types
 //  z.string()
 //  z.number()
@@ -20,103 +22,83 @@ import { z } from "zod";
 //      const CarStatusEnumSchema = z.enum(CarStatusEnum).default(CarStatusEnum.AVAILABLE).optional()
 //      Note: `optiona()` must occur after default(..) else optional doesn't work. [TESTED]
 
-// Creating a schema for strings
-const nameSchema = z.string();
-
-// ❤️ Learn: Customizing errors
-// Source: https://zod.dev/error-customization)
-//        1. Custom error message you provide (like below instructions) will be returned in `result.error.issues[*].message` property.
-// const nameSchema = z.string("Please provide string type only.");
-// const nameSchema = z.string().min(5, "Too short!");
-//        2. Another way to pass custom error message is via passing an object:
-// const nameSchema = z.string({ error: "Please provide string type only." });
-//        3. Passing an object allows us to pass function:
-// const nameSchema = z.string({
-//     error: (issue) => {
-//         const { code, input, expected } = issue
-//         console.log('issue?', Object.assign({}, { code, input, expected }))
-//         // issue.code; // the issue code
-//         // issue.input; // the input data
-//         // issue.inst; // (*very long object*) the schema/check that originated this issue
-//         // issue.path; // the path of the error
-//         return "Please provide string type only. " + new Date().toString();
-//     }
-// });
 
 // * 1. Unsafe Parsing - Throw erron if validation fails.
-// console.log(nameSchema.parse("tuna")); // Output: "tuna"
-// console.log(nameSchema.parse(12)); // ! Output: throws ZodError
+equal(z.string().parse("tuna"), "tuna")
+let e: any
+try { z.string().parse(12) } catch (error) { e = error }
+equal(e.issues[0].message, 'Invalid input: expected string, received number')
 
 // * 2. Safe Parsing via `safeParse` - No error thrown when validation fails
-console.log(nameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
+deepEqual(z.string().safeParse("tuna"), { success: true, data: "tuna" })
 // console.log(nameSchema.safeParse(12)); // { success: false; error: `ZodError instance` }
-const result1 = nameSchema.safeParse(12)
-if (!result1.success) {
-    console.log("❌ ~ result1.error.issues:", result1.error.issues)
-    /**
-    [
-        {
-            expected: 'string',
-            code: 'invalid_type',
-            path: [],
-            message: 'Invalid input: expected string, received number'
-        }
-    ]
-     */
-}
 
+// & We use `safeParse` in below code for all of our testing because I like to use in prod code as well.
 
-// User
-console.log('\nUser 🚀')
-const User = z.object({
-    username: z.string(),
-    phone: z.number(),
-});
-console.log(User.parse({ username: "Ludwig", phone: 1234 })); // { username: 'Ludwig', phone: 1234 }
+// ❤️ Default error messages at `result.error.issues[*].message` property.
+equal(z.string().safeParse('Sahil').data, 'Sahil') // No validation error
+equal(z.string().safeParse(123).error?.name, 'ZodError') // ❤️ Default error message
+equal(z.string().safeParse(123).error?.issues[0].message, 'Invalid input: expected string, received number')
+equal(z.string().safeParse(123).error?.issues.map(i => i.message).join(', '), 'Invalid input: expected string, received number')
+equal(z.string().safeParse(123).error?.message, `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Invalid input: expected string, received number"
+  }
+]`)
 
-const result2 = User.safeParse({ username: 42, phone: "100" });
-if (!result2.success) {
-    // console.log("❌ ~ result2:", result2.error) // `ZodError instance`
-    console.log("❌ ~ result2.error.issues:", result2.error.issues)
-    /**
-    [
-        {
-            expected: 'string',
-            code: 'invalid_type',
-            path: [ 'username' ],
-            message: 'Invalid input: expected string, received number'
-        },
-        {
-            expected: 'number',
-            code: 'invalid_type',
-            path: [ 'phone' ],
-            message: 'Invalid input: expected number, received string'
-        }
-    ]
-     */
+// ❤️ Custom error message (1) (Source: https://zod.dev/error-customization)
+equal(z.string("Please provide string type only.").safeParse('Sahil').data, 'Sahil') // No validation error
+equal(z.string("Please provide string type only.").safeParse(123).error?.name, 'ZodError')
+equal(
+    z.string("Please provide string type only.").safeParse(123).error?.issues[0].message,
+    "Please provide string type only.",
+)
+equal(
+    z.string("Please provide string type only.").safeParse(123).error?.message,
+    `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Please provide string type only."
+  }
+]`
+)
 
-    // console.log(z.prettifyError(result.error))
-    /**
-        ✖ Invalid input: expected string, received number
-          → at username
-        ✖ Invalid input: expected number, received string
-          → at phone
-     */
-} else {
-    result2.data;
-}
+// ❤️ Custom error message (2) - Another way to pass custom error message is via passing an object:
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.name,
+    'ZodError',
+)
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.message,
+    `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Please provide string type only."
+  }
+]`,
+)
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.issues[0].message,
+    'Please provide string type only.',
+)
 
-// ✅ Extract the inferred type
-type User = z.infer<typeof User>;
-
-
-// Create new schema with all fields optional
-const UserPartial = User.partial();
-
-
-// ❤️ Accessing a nested schema
-const CarSchema = z.object({ name: z.string(), price: z.number() });
-console.log(CarSchema.shape.name.parse("BMW")) // "BMW"
-
-
-//  TODO ❤️ ❤️ ❤️ : https://www.youtube.com/watch?v=9UVPk0Ulm6U
+// ❤️ Custom error message (3) - Fro docs: The error param optionally
+//      accepts a function. An error customization function is known as an
+//      error map in Zod terminology. The error map will run at parse time
+//      if a validation error occurs.
+equal(z.string({
+    error: (issue) => {
+        const { code, input, expected } = issue
+        equal(issue.expected, 'string')
+        equal(issue.code, 'invalid_type')
+        equal(issue.input, 123)
+        return "Please provide string type only. ";
+    }
+}).safeParse(123).error?.issues[0].message, "Please provide string type only. ")
