@@ -4,6 +4,7 @@ import { deepEqual, equal } from 'assert'
 // ❤️ Topics:
 //  - Safe (throw error on validation errors) and,
 //  - Unsafe parsing via `safeParse()` (without throwing errors on validation errors)
+//  - 3 Ways to give custom error message
 
 // * primitive types
 //  z.string()
@@ -53,12 +54,12 @@ equal(z.string().safeParse(123).error?.message, `[
 equal(z.string("Please provide string type only.").safeParse('Sahil').data, 'Sahil') // No validation error
 equal(z.string("Please provide string type only.").safeParse(123).error?.name, 'ZodError')
 equal(
-    z.string("Please provide string type only.").safeParse(123).error?.issues[0].message,
-    "Please provide string type only.",
+  z.string("Please provide string type only.").safeParse(123).error?.issues[0].message,
+  "Please provide string type only.",
 )
 equal(
-    z.string("Please provide string type only.").safeParse(123).error?.message,
-    `[
+  z.string("Please provide string type only.").safeParse(123).error?.message,
+  `[
   {
     "expected": "string",
     "code": "invalid_type",
@@ -70,12 +71,12 @@ equal(
 
 // ❤️ Custom error message (2) - Another way to pass custom error message is via passing an object:
 equal(
-    z.string({ error: "Please provide string type only." }).safeParse(123).error?.name,
-    'ZodError',
+  z.string({ error: "Please provide string type only." }).safeParse(123).error?.name,
+  'ZodError',
 )
 equal(
-    z.string({ error: "Please provide string type only." }).safeParse(123).error?.message,
-    `[
+  z.string({ error: "Please provide string type only." }).safeParse(123).error?.message,
+  `[
   {
     "expected": "string",
     "code": "invalid_type",
@@ -85,8 +86,8 @@ equal(
 ]`,
 )
 equal(
-    z.string({ error: "Please provide string type only." }).safeParse(123).error?.issues[0].message,
-    'Please provide string type only.',
+  z.string({ error: "Please provide string type only." }).safeParse(123).error?.issues[0].message,
+  'Please provide string type only.',
 )
 
 // ❤️ Custom error message (3) - Fro docs: The error param optionally
@@ -94,11 +95,11 @@ equal(
 //      error map in Zod terminology. The error map will run at parse time
 //      if a validation error occurs.
 equal(z.string({
-    error: (issue) => {
-        const { code, input, expected } = issue
-        equal(issue.expected, 'string')
-        equal(issue.code, 'invalid_type')
-        equal(issue.input, 123)
-        return "Please provide string type only. ";
-    }
+  error: (issue) => {
+    const { code, input, expected } = issue
+    equal(issue.expected, 'string')
+    equal(issue.code, 'invalid_type')
+    equal(issue.input, 123)
+    return "Please provide string type only. ";
+  }
 }).safeParse(123).error?.issues[0].message, "Please provide string type only. ")
