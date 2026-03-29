@@ -16,11 +16,13 @@
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./1.ts) -->
 <!-- The below code snippet is automatically added from ./1.ts -->
 ```ts
-// ❤️ Topics:
-//  1. Check validation errors without throwing errors via `safeParse`.
-//  2. 
-
 import { z } from "zod";
+import { deepEqual, equal } from 'assert'
+
+// ❤️ Topics:
+//  - Safe (throw error on validation errors) and,
+//  - Unsafe parsing via `safeParse()` (without throwing errors on validation errors)
+
 // * primitive types
 //  z.string()
 //  z.number()
@@ -38,61 +40,108 @@ import { z } from "zod";
 //      const CarStatusEnumSchema = z.enum(CarStatusEnum).default(CarStatusEnum.AVAILABLE).optional()
 //      Note: `optiona()` must occur after default(..) else optional doesn't work. [TESTED]
 
-// Creating a schema for strings
-const nameSchema = z.string();
-
-// ❤️ Learn: Customizing errors
-// Source: https://zod.dev/error-customization)
-//        1. Custom error message you provide (like below instructions) will be returned in `result.error.issues[*].message` property.
-// const nameSchema = z.string("Please provide string type only.");
-// const nameSchema = z.string().min(5, "Too short!");
-//        2. Another way to pass custom error message is via passing an object:
-// const nameSchema = z.string({ error: "Please provide string type only." });
-//        3. Passing an object allows us to pass function:
-// const nameSchema = z.string({
-//     error: (issue) => {
-//         const { code, input, expected } = issue
-//         console.log('issue?', Object.assign({}, { code, input, expected }))
-//         // issue.code; // the issue code
-//         // issue.input; // the input data
-//         // issue.inst; // (*very long object*) the schema/check that originated this issue
-//         // issue.path; // the path of the error
-//         return "Please provide string type only. " + new Date().toString();
-//     }
-// });
 
 // * 1. Unsafe Parsing - Throw erron if validation fails.
-// console.log(nameSchema.parse("tuna")); // Output: "tuna"
-// console.log(nameSchema.parse(12)); // ! Output: throws ZodError
+equal(z.string().parse("tuna"), "tuna")
+let e: any
+try { z.string().parse(12) } catch (error) { e = error }
+equal(e.issues[0].message, 'Invalid input: expected string, received number')
 
 // * 2. Safe Parsing via `safeParse` - No error thrown when validation fails
-console.log(nameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
+deepEqual(z.string().safeParse("tuna"), { success: true, data: "tuna" })
 // console.log(nameSchema.safeParse(12)); // { success: false; error: `ZodError instance` }
-const result1 = nameSchema.safeParse(12)
-if (!result1.success) {
-    console.log("❌ ~ result1.error.issues:", result1.error.issues)
-    /**
-    [
-        {
-            expected: 'string',
-            code: 'invalid_type',
-            path: [],
-            message: 'Invalid input: expected string, received number'
-        }
-    ]
-     */
-}
 
+// & We use `safeParse` in below code for all of our testing because I like to use in prod code as well.
+
+// ❤️ Default error messages at `result.error.issues[*].message` property.
+equal(z.string().safeParse('Sahil').data, 'Sahil') // No validation error
+equal(z.string().safeParse(123).error?.name, 'ZodError') // ❤️ Default error message
+equal(z.string().safeParse(123).error?.issues[0].message, 'Invalid input: expected string, received number')
+equal(z.string().safeParse(123).error?.issues.map(i => i.message).join(', '), 'Invalid input: expected string, received number')
+equal(z.string().safeParse(123).error?.message, `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Invalid input: expected string, received number"
+  }
+]`)
+
+// ❤️ Custom error message (1) (Source: https://zod.dev/error-customization)
+equal(z.string("Please provide string type only.").safeParse('Sahil').data, 'Sahil') // No validation error
+equal(z.string("Please provide string type only.").safeParse(123).error?.name, 'ZodError')
+equal(
+    z.string("Please provide string type only.").safeParse(123).error?.issues[0].message,
+    "Please provide string type only.",
+)
+equal(
+    z.string("Please provide string type only.").safeParse(123).error?.message,
+    `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Please provide string type only."
+  }
+]`
+)
+
+// ❤️ Custom error message (2) - Another way to pass custom error message is via passing an object:
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.name,
+    'ZodError',
+)
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.message,
+    `[
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [],
+    "message": "Please provide string type only."
+  }
+]`,
+)
+equal(
+    z.string({ error: "Please provide string type only." }).safeParse(123).error?.issues[0].message,
+    'Please provide string type only.',
+)
+
+// ❤️ Custom error message (3) - Fro docs: The error param optionally
+//      accepts a function. An error customization function is known as an
+//      error map in Zod terminology. The error map will run at parse time
+//      if a validation error occurs.
+equal(z.string({
+    error: (issue) => {
+        const { code, input, expected } = issue
+        equal(issue.expected, 'string')
+        equal(issue.code, 'invalid_type')
+        equal(issue.input, 123)
+        return "Please provide string type only. ";
+    }
+}).safeParse(123).error?.issues[0].message, "Please provide string type only. ")
+```
+<!-- MARKDOWN-AUTO-DOCS:END -->
+
+### File - `2.ts`
+
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./2.ts) -->
+<!-- The below code snippet is automatically added from ./2.ts -->
+```ts
+import { z } from "zod";
+
+// ❤️ Topics:
+//  - Accessing nested schema
 
 // User
 console.log('\nUser 🚀')
-const User = z.object({
+const UserSchema = z.object({
     username: z.string(),
     phone: z.number(),
 });
-console.log(User.parse({ username: "Ludwig", phone: 1234 })); // { username: 'Ludwig', phone: 1234 }
+console.log(UserSchema.parse({ username: "Ludwig", phone: 1234 })); // { username: 'Ludwig', phone: 1234 }
 
-const result2 = User.safeParse({ username: 42, phone: "100" });
+const result2 = UserSchema.safeParse({ username: 42, phone: "100" });
 if (!result2.success) {
     // console.log("❌ ~ result2:", result2.error) // `ZodError instance`
     console.log("❌ ~ result2.error.issues:", result2.error.issues)
@@ -125,11 +174,11 @@ if (!result2.success) {
 }
 
 // ✅ Extract the inferred type
-type User = z.infer<typeof User>;
+type UserSchema = z.infer<typeof UserSchema>;
 
 
 // Create new schema with all fields optional
-const UserPartial = User.partial();
+const partialUserSchema = UserSchema.partial();
 
 
 // ❤️ Accessing a nested schema
@@ -141,19 +190,24 @@ console.log(CarSchema.shape.name.parse("BMW")) // "BMW"
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
-### File - `2.ts`
 
-<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./2.ts) -->
-<!-- The below code snippet is automatically added from ./2.ts -->
+### File - `3.ts`
+
+
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./3.ts) -->
+<!-- The below code snippet is automatically added from ./3.ts -->
 ```ts
 import { z } from "zod";
+
+// ❤️ Topics:
+//  - Practical mongodb model schema usage.
 
 const SIMPLE_MONGODB_ID_REGEX = /^[a-f\d]{24}$/i;
 
 // From Piyush's Project
 
 // Job
-const Job = z.object({
+const JobSchema = z.object({
 	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	images: z.array(z.object({
 		public_id: z.string(),
@@ -164,7 +218,7 @@ const Job = z.object({
 	inventory: z.null(),
 	quantity: z.number(),
 });
-Job.parse({
+JobSchema.parse({
 	order: '5c9cb7138a874f1dcd0d8dcc',
 	images: [{
 		public_id: 'abc',
@@ -175,11 +229,11 @@ Job.parse({
 	inventory: null,
 	quantity: 0,
 });
-type JobType = z.infer<typeof Job>;
+type JobType = z.infer<typeof JobSchema>;
 
 
 // JobTask
-const JobTask = z.object({
+const JobTaskSchema = z.object({
 	order: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	job: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	jobTaskType: z.number(),
@@ -190,7 +244,7 @@ const JobTask = z.object({
 	// `deadline` is optional here because we may want to set this on backend instead of getting from frontend.
 	deadline: z.string().datetime().optional(),
 });
-JobTask.parse({
+JobTaskSchema.parse({
 	order: '5c9cb7138a874f1dcd0d8dcc',
 	job: '5c9cb7138a874f1dcd0d8dcc',
 	jobTaskType: 0,
@@ -200,11 +254,11 @@ JobTask.parse({
 	user: '5c9cb7138a874f1dcd0d8dcc',
 	deadline: '2023-11-15T13:40:18.365Z',
 });
-type JobTaskType = z.infer<typeof JobTask>;
+type JobTaskType = z.infer<typeof JobTaskSchema>;
 
 
 // Order
-const Order = z.object({
+const OrderSchema = z.object({
 	user: z.string().regex(SIMPLE_MONGODB_ID_REGEX),
 	paymentInfo: z.object({
 		subTotal: z.number(),
@@ -224,7 +278,7 @@ const Order = z.object({
 		instructions: z.string(),
 	})
 });
-Order.parse({
+OrderSchema.parse({
 	user: '5c9cb7138a874f1dcd0d8dcc',
 	paymentInfo: {
 		subTotal: 0,
@@ -244,13 +298,6 @@ Order.parse({
 		instructions: 'abc',
 	}
 });
-type OrderType = z.infer<typeof Order>;
+type OrderType = z.infer<typeof OrderSchema>;
 ```
-<!-- MARKDOWN-AUTO-DOCS:END -->
-
-
-### File - `3.ts`
-
-
-<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./3.ts) -->
 <!-- MARKDOWN-AUTO-DOCS:END -->
