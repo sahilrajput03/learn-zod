@@ -52,11 +52,12 @@ equal(e.issues[0].message, 'Invalid input: expected string, received number')
 deepEqual(z.string().safeParse("tuna"), { success: true, data: "tuna" })
 // console.log(nameSchema.safeParse(12)); // { success: false; error: `ZodError instance` }
 
-// & We use `safeParse` in below code for all of our testing because I like to use in prod code as well.
+// & We use `safeParse` in below code for all of our testing because I
+//   like to use it in production code as well.
 
 // ❤️ Default error messages at `result.error.issues[*].message` property.
 equal(z.string().safeParse('Sahil').data, 'Sahil') // No validation error
-equal(z.string().safeParse(123).error?.name, 'ZodError') // ❤️ Default error message
+equal(z.string().safeParse(123).error?.name, 'ZodError')
 equal(z.string().safeParse(123).error?.issues[0].message, 'Invalid input: expected string, received number')
 equal(z.string().safeParse(123).error?.issues.map(i => i.message).join(', '), 'Invalid input: expected string, received number')
 equal(z.string().safeParse(123).error?.message, `[
