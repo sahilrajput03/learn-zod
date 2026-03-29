@@ -1,3 +1,7 @@
+// ❤️ Topics:
+//  1. Check validation errors without throwing errors via `safeParse`.
+//  2. 
+
 import { z } from "zod";
 // * primitive types
 //  z.string()
@@ -18,9 +22,12 @@ import { z } from "zod";
 
 // Creating a schema for strings
 const nameSchema = z.string();
-// Learn: Customizing errors (https://zod.dev/error-customization)
-//        1. We can provide custome error message via and it will be returned in `error.issues[*].message` property:
+
+// ❤️ Learn: Customizing errors
+// Source: https://zod.dev/error-customization)
+//        1. Custom error message you provide (like below instructions) will be returned in `result.error.issues[*].message` property.
 // const nameSchema = z.string("Please provide string type only.");
+// const nameSchema = z.string().min(5, "Too short!");
 //        2. Another way to pass custom error message is via passing an object:
 // const nameSchema = z.string({ error: "Please provide string type only." });
 //        3. Passing an object allows us to pass function:
@@ -35,11 +42,12 @@ const nameSchema = z.string();
 //         return "Please provide string type only. " + new Date().toString();
 //     }
 // });
-// parsing
-console.log(nameSchema.parse("tuna")); // "tuna"
-// console.log(nameSchema.parse(12)); // throws ZodError
 
-// Using `safeParse` zod doesn't throw error when validation fails
+// * 1. Unsafe Parsing - Throw erron if validation fails.
+// console.log(nameSchema.parse("tuna")); // Output: "tuna"
+// console.log(nameSchema.parse(12)); // ! Output: throws ZodError
+
+// * 2. Safe Parsing via `safeParse` - No error thrown when validation fails
 console.log(nameSchema.safeParse("tuna")); // { success: true; data: "tuna" }
 // console.log(nameSchema.safeParse(12)); // { success: false; error: `ZodError instance` }
 const result1 = nameSchema.safeParse(12)
