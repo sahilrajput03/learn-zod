@@ -50,7 +50,7 @@ equal(z.string().safeParse(123).error?.message, `[
   }
 ]`)
 
-// ❤️ Custom error message (1) (Source: https://zod.dev/error-customization)
+// ❤️ CUSTOM ERROR MESSAGE (1) (Source: https://zod.dev/error-customization)
 equal(z.string("Please provide string type only.").safeParse('Sahil').data, 'Sahil') // No validation error
 equal(z.string("Please provide string type only.").safeParse(123).error?.name, 'ZodError')
 equal(
@@ -69,7 +69,7 @@ equal(
 ]`
 )
 
-// ❤️ Custom error message (2) - Another way to pass custom error message is via passing an object:
+// ❤️ CUSTOM ERROR MESSAGE (2) - Another way to pass custom error message is via passing an object:
 equal(
   z.string({ error: "Please provide string type only." }).safeParse(123).error?.name,
   'ZodError',
@@ -90,7 +90,7 @@ equal(
   'Please provide string type only.',
 )
 
-// ❤️ Custom error message (3) - Fro docs: The error param optionally
+// ❤️ CUSTOM ERROR MESSAGE (3) - Fro docs: The error param optionally
 //      accepts a function. An error customization function is known as an
 //      error map in Zod terminology. The error map will run at parse time
 //      if a validation error occurs.
